@@ -49,7 +49,7 @@ You can override them with `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env`.
 - Alert management with acknowledge/dismiss
 - Inference health monitoring
 - Dark / light mode toggle
-- Smooth login animations with orbiting rings
+- Login Page 
 - LoRa packet documentation in Help page
 
 ## Project Structure
