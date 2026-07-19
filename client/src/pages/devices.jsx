@@ -57,12 +57,12 @@ export default function Devices() {
           <h1 className="text-3xl font-mono font-bold tracking-tight">DEVICES</h1>
           <p className="text-muted-foreground font-mono text-sm">Manage ESP32-S3 LoRa nodes</p>
         </div>
-        <div className="flex gap-2">
-          <div className="relative">
+        <div className="flex w-full flex-col sm:flex-row gap-2 sm:items-center sm:justify-end">
+          <div className="relative w-full sm:w-auto">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search devices..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 font-mono w-64" />
+            <Input placeholder="Search devices..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 font-mono w-full sm:w-64" />
           </div>
-          <Button onClick={() => setOpen(true)} className="font-mono"><Plus className="mr-2 h-4 w-4" /> ADD DEVICE</Button>
+          <Button onClick={() => setOpen(true)} className="font-mono w-full sm:w-auto"><Plus className="mr-2 h-4 w-4" /> ADD DEVICE</Button>
         </div>
       </div>
 
@@ -75,7 +75,7 @@ export default function Devices() {
             <Table>
               <TableHeader className="bg-muted/50">
                 <TableRow>
-                  <TableHead className="font-mono">NAME / MAC</TableHead>
+                  <TableHead className="font-mono">NAME / DEVICE ID</TableHead>
                   <TableHead className="font-mono">STATUS</TableHead>
                   <TableHead className="font-mono">FIRMWARE</TableHead>
                   <TableHead className="font-mono">BATTERY</TableHead>
@@ -123,7 +123,7 @@ export default function Devices() {
           <DialogHeader><DialogTitle>{editing ? "Edit Device" : "Add Device"}</DialogTitle></DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-1"><Label>Name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>
-            <div className="space-y-1"><Label>MAC Address</Label><Input value={form.macAddress} onChange={(e) => setForm({ ...form, macAddress: e.target.value })} required /></div>
+            <div className="space-y-1"><Label>Device ID Address ( firmware coded ID )</Label><Input value={form.macAddress} onChange={(e) => setForm({ ...form, macAddress: e.target.value })} required /></div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <Label>Status</Label>
@@ -135,7 +135,7 @@ export default function Devices() {
               <div className="space-y-1"><Label>Battery %</Label><Input type="number" value={form.batteryLevel} onChange={(e) => setForm({ ...form, batteryLevel: e.target.value })} /></div>
             </div>
             <div className="space-y-1"><Label>Firmware Version</Label><Input value={form.firmwareVersion} onChange={(e) => setForm({ ...form, firmwareVersion: e.target.value })} /></div>
-            <div className="space-y-1"><Label>Subject ID</Label><Input type="number" value={form.subjectId} onChange={(e) => setForm({ ...form, subjectId: e.target.value })} /></div>
+            <div className="space-y-1"><Label>ID</Label><Input type="number" value={form.subjectId} onChange={(e) => setForm({ ...form, subjectId: e.target.value })} /></div>
             <Button type="submit" className="w-full" disabled={createMutation.isPending || updateMutation.isPending}>
               {(createMutation.isPending || updateMutation.isPending) && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               {editing ? "UPDATE" : "CREATE"}

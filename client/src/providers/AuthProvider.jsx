@@ -16,24 +16,68 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     if (!token) {
+      setUser(null);
       setIsLoading(false);
       return;
     }
-    setIsLoading(true);
-    getMe()
-      .then(setUser)
-      .catch(() => {
-        localStorage.removeItem("dsm_token");
-        setToken(null);
-        setLocation("/login");
-      })
-      .finally(() => setIsLoading(false));
+
+    const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    async function hydrateSession() {
+      setIsLoading(true);
+      const maxRetries = 8;
+      try {
+        for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+          try {
+            const currentUser = await getMe();
+            if (!cancelled) {
+              setUser(currentUser);
+            }
+            return;
+          } catch (err) {
+            const status = err?.status;
+            const retryable = status >= 500 || err?.message === "Failed to fetch";
+
+            if (retryable && attempt < maxRetries) {
+              const retryDelayMs = Math.min(500 + attempt * 250, 2000);
+              await wait(retryDelayMs);
+              continue;
+            }
+
+            if (cancelled) return;
+
+            if (status === 401 || status === 403) {
+              localStorage.removeItem("dsm_token");
+              setToken(null);
+              setUser(null);
+              setLocation("/login");
+              return;
+            }
+
+            return;
+          }
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    hydrateSession();
+
+    return () => {
+      cancelled = true;
+    };
   }, [token, setLocation]);
 
-  const login = (newToken) => {
+  const login = (newToken, nextUser = null) => {
     localStorage.setItem("dsm_token", newToken);
     setToken(newToken);
+    setUser(nextUser);
   };
 
   const logout = () => {

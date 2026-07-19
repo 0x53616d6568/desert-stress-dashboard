@@ -57,12 +57,12 @@ export default function Firmware() {
           <h1 className="text-3xl font-mono font-bold tracking-tight">FIRMWARE</h1>
           <p className="text-muted-foreground font-mono text-sm">Version registry and patch notes</p>
         </div>
-        <div className="flex gap-2">
-          <div className="relative">
+        <div className="flex w-full flex-col sm:flex-row gap-2 sm:items-center sm:justify-end">
+          <div className="relative w-full sm:w-auto">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search firmware..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 font-mono w-64" />
+            <Input placeholder="Search firmware..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 font-mono w-full sm:w-64" />
           </div>
-          <Button onClick={() => setOpen(true)} className="font-mono"><Plus className="mr-2 h-4 w-4" /> ADD VERSION</Button>
+          <Button onClick={() => setOpen(true)} className="font-mono w-full sm:w-auto"><Plus className="mr-2 h-4 w-4" /> ADD VERSION</Button>
         </div>
       </div>
 

@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { useLocation } from "wouter";
 import { login as apiLogin } from "@/services/api";
+import { useTheme } from "@/components/theme-provider";
 import anime from "animejs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Activity, Loader2, Radio, HeartPulse, BrainCircuit, MapPin, Wifi, ArrowRight } from "lucide-react";
+import { Activity, Loader2, Radio, HeartPulse, BrainCircuit, MapPin, Wifi, ArrowRight, Moon, Sun } from "lucide-react";
 
 function OrbitingRings({ containerRef }) {
   useEffect(() => {
@@ -94,6 +95,7 @@ const featureCards = [
 
 export default function Login() {
   const { login: setAuthToken } = useAuth();
+  const { theme, setTheme } = useTheme();
   const [, setLocation] = useLocation();
   const orbitRef = useRef(null);
   const pageRef = useRef(null);
@@ -119,8 +121,30 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      const data = await apiLogin({ email, password });
-      setAuthToken(data.token);
+      let data = null;
+      let lastError = null;
+      const maxRetries = 8;
+
+      for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+        try {
+          data = await apiLogin({ email, password });
+          break;
+        } catch (err) {
+          const shouldRetry = err?.status >= 500 || err?.message === "Failed to fetch";
+          if (!shouldRetry || attempt === maxRetries) {
+            throw err;
+          }
+          lastError = err;
+          const retryDelayMs = Math.min(500 + attempt * 250, 2000);
+          await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+        }
+      }
+
+      if (!data) {
+        throw lastError || new Error("Authentication failed");
+      }
+
+      setAuthToken(data.token, data.user);
       setLocation("/dashboard");
     } catch (err) {
       setError(err.message || "Authentication failed");
@@ -131,6 +155,19 @@ export default function Login() {
 
   return (
     <div ref={pageRef} className="relative min-h-screen w-full flex bg-background overflow-hidden">
+      <div className="absolute top-4 right-4 z-20">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="font-mono"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        >
+          {theme === "dark" ? <Sun className="h-4 w-4 mr-2" /> : <Moon className="h-4 w-4 mr-2" />}
+          {theme === "dark" ? "Light" : "Dark"}
+        </Button>
+      </div>
+
       <div className="hidden lg:flex flex-1 flex-col justify-center p-12 relative z-10">
         <div className="login-animate-in max-w-md">
           <div className="flex items-center gap-3 mb-8">

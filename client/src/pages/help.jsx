@@ -117,7 +117,7 @@ export default function Help() {
               <CardTitle className="font-mono text-lg flex items-center gap-2"><HeartPulse className="h-5 w-5" /> ML Model Overview</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 font-mono text-sm">
-              <p>On-device inference runs an XGBoost or RandomForest classifier/regressor trained on labelled heat-stress data.</p>
+              <p>On-device inference runs an XGBoost  classifier/regressor trained on labelled heat-stress data.</p>
               <div className="flex gap-2 flex-wrap">
                 <Badge variant="outline">tskin</Badge>
                 <Badge variant="outline">tamb</Badge>
@@ -144,7 +144,7 @@ export default function Help() {
             <CardContent className="space-y-3 font-mono text-sm">
               <p>Desert Stress Monitor (DSM-CONTROL) is a full-stack telemetry dashboard for monitoring camel and human stress in harsh environments.</p>
               <p>Built with React, Vite, Express, PostgreSQL, WebSocket, and Recharts.</p>
-              <p className="text-xs text-muted-foreground">Set ADMIN_EMAIL and ADMIN_PASSWORD in .env to configure login.</p>
+              {/*<p className="text-xs text-muted-foreground">Set ADMIN_EMAIL and ADMIN_PASSWORD in .env to configure login.</p>*/}
             </CardContent>
           </Card>
         </TabsContent>

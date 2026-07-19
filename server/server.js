@@ -4,6 +4,8 @@ import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { createServer } from "http";
+import path from "path";
+import { fileURLToPath } from "url";
 
 import { initDatabase } from "./config/database.js";
 import { initWss } from "./ws.js";
@@ -15,6 +17,8 @@ import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
 const server = createServer(app);
+let isDatabaseReady = false;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const PORT = process.env.PORT || 3001;
 const NODE_ENV = process.env.NODE_ENV || "development";
@@ -43,22 +47,48 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use("/api", (req, res, next) => {
+  if (req.path === "/healthz") {
+    return next();
+  }
+  if (!isDatabaseReady) {
+    return res.status(503).json({ error: "Server is still starting up. Please retry shortly." });
+  }
+  next();
+});
+
 app.use("/api", routes);
 
 app.get("/healthz", (req, res) => {
-  res.json({ status: "ok", mode: global.db?.mode || "unknown" });
+  res.status(isDatabaseReady ? 200 : 503).json({
+    status: isDatabaseReady ? "ok" : "starting",
+    mode: global.db?.mode || "unknown",
+  });
 });
+
+const clientDistDir = process.env.CLIENT_DIST_DIR;
+if (clientDistDir) {
+  const resolvedDistDir = path.isAbsolute(clientDistDir)
+    ? clientDistDir
+    : path.resolve(__dirname, clientDistDir);
+  app.use(express.static(resolvedDistDir));
+  app.get(/^\/(?!api|healthz).*/, (_req, res) => {
+    res.sendFile(path.join(resolvedDistDir, "index.html"));
+  });
+}
 
 app.use(errorHandler);
 
 initWss(server);
 
 async function start() {
-  await initDatabase();
-
   server.listen(PORT, () => {
     logger.info(`Server listening on port ${PORT} in ${NODE_ENV} mode`);
   });
+
+  await initDatabase();
+  isDatabaseReady = true;
+  logger.info("Database initialization complete");
 }
 
 start().catch((err) => {
